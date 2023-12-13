@@ -39,11 +39,96 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const bodyParser = require("body-parser");
+
+const app = express();
+
+const TODOS_PATH = path.resolve(__dirname, "todos.txt");
+
+app.use(bodyParser.json());
+
+const findIndexById = (arr, targetId) => {
+  const index = arr.findIndex((item) => item.id === targetId);
+  return index;
+};
+
+app.get("/todos", async (req, res) => {
+  let fileData = await fs.promises.readFile(TODOS_PATH, "utf-8");
+  todoData = JSON.parse(fileData || "[]");
+
+  if (fileData.trim() !== "") {
+    todoData.splice(0, 1);
+  }
+
+  res.status(200).send(todoData);
+});
+
+app.get("/todos/:id", async (req, res) => {
+  let id = parseInt(req.params.id);
+
+  let fileData = await fs.promises.readFile(TODOS_PATH, "utf-8");
+  todoData = JSON.parse(fileData || "[]");
+  let idx = findIndexById(todoData, id);
+  if (idx == -1) {
+    res.status(404).send();
+  } else {
+    res.status(200).send(todoData[idx]);
+  }
+});
+
+app.post("/todos", async (req, res) => {
+  let fileData = await fs.promises.readFile(TODOS_PATH, "utf-8");
+  todoData = JSON.parse(fileData || "[]");
+  let id = 0;
+  let newFile = false;
+  if (fileData.trim() !== "") {
+    id = todoData[0].lastId;
+    todoData[0] = { lastId: id + 1 };
+    newFile = true;
+  } else {
+    todoData = [];
+    todoData.push({ lastId: id + 1 });
+  }
+
+  todoData.push({ ...req.body, id: todoData[0].lastId });
+
+  await fs.promises.writeFile(TODOS_PATH, JSON.stringify(todoData));
+  res.status(201).send({ id: todoData[0].lastId });
+});
+
+app.put("/todos/:id", async (req, res) => {
+  let id = parseInt(req.params.id);
+
+  let fileData = await fs.promises.readFile(TODOS_PATH, "utf-8");
+  todoData = JSON.parse(fileData || "[]");
+  let idx = findIndexById(todoData, id);
+  if (idx == -1) {
+    res.status(404).send();
+  } else {
+    todoData[idx] = { ...req.body, id: id };
+    await fs.promises.writeFile(TODOS_PATH, JSON.stringify(todoData));
+    res.status(200).send();
+  }
+});
+
+app.delete("/todos/:id", async (req, res) => {
+  let id = parseInt(req.params.id);
+
+  let fileData = await fs.promises.readFile(TODOS_PATH, "utf-8");
+  todoData = JSON.parse(fileData || "[]");
+  let idx = findIndexById(todoData, id);
+  if (idx == -1) {
+    res.status(404).send();
+  } else {
+    todoData.splice(idx, 1);
+    await fs.promises.writeFile(TODOS_PATH, JSON.stringify(todoData));
+    res.status(200).send();
+  }
+});
+
+app.listen(3000);
+
+module.exports = app;
