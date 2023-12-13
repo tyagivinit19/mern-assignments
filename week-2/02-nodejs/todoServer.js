@@ -129,6 +129,10 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  res.status(404).send();
+});
+
 app.listen(3000);
 
 module.exports = app;
