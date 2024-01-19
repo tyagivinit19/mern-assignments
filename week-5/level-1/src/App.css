@@ -1,0 +1,26 @@
+.card {
+    box-shadow:2px 2px 16px 3px #888888;
+    width: 40%;
+    padding: 1px 25px 25px 25px;
+    border-radius: 10px;
+}
+
+.description {
+    font-size: 20px;
+}
+
+.interests__list {
+ list-style: none;
+ padding-inline-start: 0
+}
+
+.button {
+    padding: 8px;
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 0px;
+    background-color: dodgerblue;
+    color: #fff;
+    box-shadow: 1px 1px 3px 1px #888888;
+    cursor: pointer;
+}
